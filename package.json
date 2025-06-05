@@ -1,5 +1,5 @@
 {
-  "name": "ris-schedule-kernel",
+  "name": "schedule-core",
   "version": "1.0.0",
   "description": "The back-end core module used for storing/displaying the course schedule",
   "main": "dist/index.js",
