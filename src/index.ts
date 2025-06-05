@@ -1,8 +1,6 @@
 export * from './types';
 
-export { LessonManager } from './managers/lessonManager';
-export { SubjectManager } from './managers/subjectManager';
-export { TimeManager } from './managers/timeManager';
+export { CsesTransformer } from './managers/csesTransformer';
 
 export { ScheduleKernel } from './scheduleKernel';
 

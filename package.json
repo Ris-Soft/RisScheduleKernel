@@ -33,7 +33,9 @@
     "prepare": "npm run build",
     "start": "ts-node src/index.ts",
     "clean": "rimraf dist",
-    "prebuild": "npm run clean"
+    "prebuild": "npm run clean",
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "devDependencies": {
     "@types/node": "^22.15.29",
@@ -42,6 +44,8 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "express": "^5.1.0"
+    "@types/js-yaml": "^4.0.9",
+    "express": "^5.1.0",
+    "js-yaml": "^4.1.0"
   }
 }
