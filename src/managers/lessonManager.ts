@@ -1,5 +1,5 @@
 import { UUID } from "crypto";
-import { lessonTaget, scheduleType, subjectTagret } from "../types";
+import { lessonTarget, scheduleType, subjectTarget } from "../types";
 import { getWeekTypeForDate } from "../utils";
 
 export class LessonManager {
@@ -8,7 +8,7 @@ export class LessonManager {
   /**
    * 获取今日课程数据（已处理单双周）
    * @returns {lessonTaget[]} 今日课程数组
-   */  getTodayLessons(weekMode: string): lessonTaget[] {
+   */  getTodayLessons(weekMode: string): lessonTarget[] {
     const today = new Date();
     const dateStr = today.toISOString().split('T')[0];
     
@@ -41,10 +41,10 @@ export class LessonManager {
    */
   getTeacherLessons(teacherName: string) {
     const teacherSubjects = this.config.subjects.filter(
-      (subject: subjectTagret) => subject.teacherName === teacherName
+      (subject: subjectTarget) => subject.teacherName === teacherName
     );
 
-    return teacherSubjects.map((subject: subjectTagret) => {
+    return teacherSubjects.map((subject: subjectTarget) => {
       const lessons = this.config.schedules.flatMap((schedule: scheduleType) =>
         schedule.lessons
           .map((lesson, index) => ({
@@ -338,7 +338,7 @@ export class LessonManager {
         dateMode: false,
         activeDay: dayIndex,
         activeWeek: week === "even" ? 2 : 1,
-        lessons: [{ subjectUuid }],
+        lessons: [{ subjectUuid, timeUuid: crypto.randomUUID() }],
       };
       this.config.schedules.push(newSchedule);
       return 0;

@@ -1,6 +1,6 @@
 import { UUID, randomUUID } from "crypto";
 import * as yaml from 'js-yaml';
-import { configType, subjectTagret, timeTarget, lessonTaget, scheduleType } from "../types";
+import { configType, subjectTarget, timeTarget, lessonTarget, scheduleType } from "../types";
 
 interface CsesSubject {
     name: string;
@@ -40,7 +40,7 @@ export class CsesTransformer {
         }
 
         // 转换科目
-        const subjects: subjectTagret[] = csesData.subjects.map(subject => ({
+        const subjects: subjectTarget[] = csesData.subjects.map(subject => ({
             uuid: randomUUID() as UUID,
             name: subject.name,
             type: 'subject' as const,
@@ -84,7 +84,7 @@ export class CsesTransformer {
                     cachedName: subject.name,
                     cachedShortName: subject.shortName,
                     timeUuid: timeTarget.UUID
-                } as lessonTaget;
+                } as lessonTarget;
             });
 
             // 根据weeks字段创建对应的课程表

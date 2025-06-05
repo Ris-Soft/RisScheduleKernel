@@ -1,5 +1,5 @@
 import { UUID } from "crypto";
-import { subjectTagret } from "../types";
+import { subjectTarget } from "../types";
 
 export class SubjectManager {
   constructor(private config: any) {}
@@ -7,40 +7,40 @@ export class SubjectManager {
   /**
    * 获取所有科目信息
    */
-  getAllSubjects(): subjectTagret[] {
+  getAllSubjects(): subjectTarget[] {
     return this.config.subjects;
   }
 
   /**
    * 获取指定科目信息
    */
-  getSubject(uuid: UUID): subjectTagret | undefined {
-    return this.config.subjects.find((subject: subjectTagret) => subject.uuid === uuid);
+  getSubject(uuid: UUID): subjectTarget | undefined {
+    return this.config.subjects.find((subject: subjectTarget) => subject.uuid === uuid);
   }
 
   /**
    * 根据科目名称获取科目UUID
    */
   getSubjectUuidByName(name: string): UUID | undefined {
-    return this.config.subjects.find((subject: subjectTagret) => subject.name === name)?.uuid;
+    return this.config.subjects.find((subject: subjectTarget) => subject.name === name)?.uuid;
   }
 
   /**
    * 根据科目UUID获取科目名称
    */
   getSubjectNameByUuid(uuid: UUID): string | undefined {
-    return this.config.subjects.find((subject: subjectTagret) => subject.uuid === uuid)?.name;
+    return this.config.subjects.find((subject: subjectTarget) => subject.uuid === uuid)?.name;
   }
 
   /**
    * 创建新科目
    */
-  createSubject(subject: Omit<subjectTagret, 'uuid'>): UUID | undefined {
-    if (this.config.subjects.some((s: subjectTagret) => s.name === subject.name)) {
+  createSubject(subject: Omit<subjectTarget, 'uuid'>): UUID | undefined {
+    if (this.config.subjects.some((s: subjectTarget) => s.name === subject.name)) {
       return undefined;
     }
 
-    const newSubject: subjectTagret = {
+    const newSubject: subjectTarget = {
       ...subject,
       uuid: crypto.randomUUID() as UUID
     };
@@ -52,14 +52,14 @@ export class SubjectManager {
   /**
    * 编辑科目信息
    */
-  editSubject(uuid: UUID, subject: Partial<Omit<subjectTagret, 'uuid'>>): boolean {
-    const index = this.config.subjects.findIndex((s: subjectTagret) => s.uuid === uuid);
+  editSubject(uuid: UUID, subject: Partial<Omit<subjectTarget, 'uuid'>>): boolean {
+    const index = this.config.subjects.findIndex((s: subjectTarget) => s.uuid === uuid);
     if (index === -1) {
       return false;
     }
 
     if (subject.name && 
-        this.config.subjects.some((s: subjectTagret) => s.name === subject.name && s.uuid !== uuid)) {
+        this.config.subjects.some((s: subjectTarget) => s.name === subject.name && s.uuid !== uuid)) {
       return false;
     }
 
@@ -74,7 +74,7 @@ export class SubjectManager {
    * 删除科目
    */
   deleteSubject(uuid: UUID): boolean {
-    const index = this.config.subjects.findIndex((s: subjectTagret) => s.uuid === uuid);
+    const index = this.config.subjects.findIndex((s: subjectTarget) => s.uuid === uuid);
     if (index === -1) {
       return false;
     }    // 检查常规课程表中的使用情况
