@@ -300,4 +300,106 @@ export class LessonManager {
         (weekType === "odd" ? s.activeWeek === 1 : s.activeWeek === 2)
     );
   }
+
+  /**
+   * 创建新的课节配置
+   * @param dayIndex 星期几（1-7）
+   * @param subjectUuid 科目UUID
+   * @param week 可选的周数设置（单周/双周）
+   * @returns 添加的位置索引，失败返回-1
+   */
+  createLesson(
+    dayIndex: 1 | 2 | 3 | 4 | 5 | 6 | 7,
+    subjectUuid: UUID,
+    week?: "odd" | "even"
+  ): number {
+    const schedule = this.config.schedules.find(
+      (s: scheduleType) =>
+        !s.dateMode &&
+        s.activeDay === dayIndex &&
+        (week
+          ? week === "odd"
+            ? s.activeWeek === 1
+            : s.activeWeek === 2
+          : true)
+    );
+
+    if (!schedule) {
+      const newSchedule: scheduleType = {
+        dateMode: false,
+        activeDay: dayIndex,
+        activeWeek: week === "even" ? 2 : 1,
+        lessons: [{ subjectUuid }],
+      };
+      this.config.schedules.push(newSchedule);
+      return 0;
+    }
+
+    schedule.lessons.push({ subjectUuid });
+    return schedule.lessons.length - 1;
+  }
+
+  /**
+   * 在指定课节后添加新课节
+   * @param dayIndex 星期几（1-7）
+   * @param lessonIndex 在此课节后添加
+   * @param subjectUuid 科目UUID
+   * @param week 可选的周数设置（单周/双周）
+   * @returns 是否添加成功
+   */
+  insertLessonAfter(
+    dayIndex: 1 | 2 | 3 | 4 | 5 | 6 | 7,
+    lessonIndex: number,
+    subjectUuid: UUID,
+    week?: "odd" | "even"
+  ): boolean {
+    const schedule = this.config.schedules.find(
+      (s: scheduleType) =>
+        !s.dateMode &&
+        s.activeDay === dayIndex &&
+        (week
+          ? week === "odd"
+            ? s.activeWeek === 1
+            : s.activeWeek === 2
+          : true)
+    );
+
+    if (!schedule || lessonIndex >= schedule.lessons.length) {
+      return false;
+    }
+
+    schedule.lessons.splice(lessonIndex + 1, 0, { subjectUuid });
+    return true;
+  }
+
+  /**
+   * 删除课节
+   * @param dayIndex 星期几（1-7）
+   * @param lessonIndex 要删除的课节索引
+   * @param week 可选的周数设置（单周/双周）
+   * @returns 是否删除成功
+   */
+  deleteLesson(
+    dayIndex: 1 | 2 | 3 | 4 | 5 | 6 | 7,
+    lessonIndex: number,
+    week?: "odd" | "even"
+  ): boolean {
+    const schedule = this.config.schedules.find(
+      (s: scheduleType) =>
+        !s.dateMode &&
+        s.activeDay === dayIndex &&
+        (week
+          ? week === "odd"
+            ? s.activeWeek === 1
+            : s.activeWeek === 2
+          : true)
+    );
+
+    if (!schedule || lessonIndex >= schedule.lessons.length) {
+      return false;
+    }
+
+    schedule.lessons.splice(lessonIndex, 1);
+    return true;
+  }
 }
