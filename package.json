@@ -2,30 +2,46 @@
   "name": "ris-schedule-kernel",
   "version": "1.0.0",
   "description": "The back-end core module used for storing/displaying the course schedule",
-  "main": "src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": ""
   },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "keywords": [
     "express",
     "typescript",
-    "nodejs"
+    "nodejs",
+    "schedule",
+    "course-management"
   ],
   "author": "PYLXU < e-pylxu@outlook.com >",
   "engines": {
     "node": ">=16.0.0"
   },
-  "devDependencies": {
-    "@types/node": "^22.15.29"
-  },
   "scripts": {
-    "start": "ts-node src/index.ts"
+    "build": "tsc",
+    "prepare": "npm run build",
+    "start": "ts-node src/index.ts",
+    "clean": "rimraf dist",
+    "prebuild": "npm run clean"
   },
-  "dependencies": {
-    "express": "^5.1.0",
+  "devDependencies": {
+    "@types/node": "^22.15.29",
+    "rimraf": "^5.0.10",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
   }
 }

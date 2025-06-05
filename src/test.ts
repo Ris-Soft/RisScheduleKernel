@@ -1,14 +1,14 @@
-import { scheduleKernel } from "./index";
+import { ScheduleKernel } from "./index";
 
 /**
- * 示例：如何使用 scheduleKernel
+ * 示例：如何使用 ScheduleKernel
  */
 
 // 假设有一个配置文件路径
 const configPath = "./config.json";
 
 // 创建课程表内核实例
-const kernel = new scheduleKernel(configPath);
+const kernel = new ScheduleKernel(configPath);
 
 // 获取今天的课程
 const todayLessons = kernel.getTodayLessons();

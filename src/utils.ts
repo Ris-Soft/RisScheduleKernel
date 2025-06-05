@@ -1,11 +1,14 @@
+import { UUID } from "crypto";
+import { configType } from "./types";
+
 /**
  * 获取默认的课程表配置对象。
  */
-export function getDefaultConfig() {
+export function getDefaultConfig(): configType {
   return {
     version: "1.0.0",
     groupName: "",
-    groupUuid: "",
+    groupUuid: "" as UUID,
     startDate: new Date(),
     schedules: [],
     subjects: [],
