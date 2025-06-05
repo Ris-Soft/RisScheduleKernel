@@ -1,5 +1,5 @@
 {
-  "name": "schedule-core",
+  "name": "ris-schedule-kernel",
   "version": "1.0.0",
   "description": "The back-end core module used for storing/displaying the course schedule",
   "main": "dist/index.js",
@@ -11,7 +11,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/Ris-Soft/RisScheduleKernel"
   },
   "files": [
     "dist",
@@ -29,7 +29,7 @@
     "node": ">=16.0.0"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "pwsh -File build.ps1",
     "prepare": "npm run build",
     "start": "ts-node src/index.ts",
     "clean": "rimraf dist",
