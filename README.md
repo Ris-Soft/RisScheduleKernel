@@ -17,7 +17,7 @@
 ## 安装
 
 ```bash
-npm install ris-schedule-kernel
+npm install schedule-kernel
 ```
 
 ## 基础使用
@@ -25,7 +25,7 @@ npm install ris-schedule-kernel
 ### 初始化课程表
 
 ```typescript
-import { ScheduleKernel } from 'ris-schedule-kernel';
+import { ScheduleKernel } from 'schedule-kernel';
 
 // 创建新的课程表实例
 const kernel = new ScheduleKernel('config.json');
