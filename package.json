@@ -1,5 +1,5 @@
 {
-  "name": "ris-schedule-kernel",
+  "name": "schedule-core",
   "version": "1.0.0",
   "description": "The back-end core module used for storing/displaying the course schedule",
   "main": "dist/index.js",
@@ -8,7 +8,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "license": "MIT",
+  "license": "LGPL-3.0-only",
   "repository": {
     "type": "git",
     "url": "https://github.com/Ris-Soft/RisScheduleKernel"
