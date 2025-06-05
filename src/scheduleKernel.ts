@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync } from "fs";
 import { configType } from "./types";
-import { getDefaultConfig } from "./utils";
+import { getDefaultConfig, getWeekTypeForDate } from "./utils";
 import { LessonManager } from "./managers/lessonManager";
 import { SubjectManager } from "./managers/subjectManager";
 import { TimeManager } from "./managers/timeManager";
@@ -96,16 +96,9 @@ export class ScheduleKernel {
 
   /**
    * 设定单双周状态
-   */
-  setWeekMode(date: Date): void {
-    const dateGap = date.getDate() - this.config.startDate.getDate();
-    if (dateGap % 14 === 0) {
-      this.weekMode = "odd";
-    } else if (dateGap % 7 === 0) {
-      this.weekMode = "even";
-    } else {
-      this.weekMode = "all";
-    }
+   */  setWeekMode(date: Date): void {
+    const { weekType } = getWeekTypeForDate(this.config.startDate, date);
+    this.weekMode = weekType;
   }
 
 

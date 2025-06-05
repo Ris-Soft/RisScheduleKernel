@@ -1,5 +1,6 @@
 import { UUID } from "crypto";
 import { lessonTaget, scheduleType, subjectTagret } from "../types";
+import { getWeekTypeForDate } from "../utils";
 
 export class LessonManager {
   constructor(private config: any) {}
@@ -7,21 +8,29 @@ export class LessonManager {
   /**
    * 获取今日课程数据（已处理单双周）
    * @returns {lessonTaget[]} 今日课程数组
-   */
-  getTodayLessons(weekMode: string): lessonTaget[] {
+   */  getTodayLessons(weekMode: string): lessonTaget[] {
     const today = new Date();
-    const day = today.getDay() || 7; // 将周日的0转换为7
+    const dateStr = today.toISOString().split('T')[0];
+    
+    // 先检查是否有临时课程安排
+    if (this.config.temporarySchedules) {
+      const tempSchedule = this.config.temporarySchedules.find(
+        (ts: any) => ts.date === dateStr
+      );
+      if (tempSchedule) {
+        return tempSchedule.lessons;
+      }
+    }
 
-    // 查找今天的课程表
+    // 如果没有临时课程，则返回正常课程
+    const { dayIndex } = getWeekTypeForDate(this.config.startDate, today);
     const todaySchedule = this.config.schedules.find(
       (schedule: scheduleType) =>
-        (schedule.dateMode &&
-          schedule.activeDate?.getDate() === today.getDate()) ||
-        (!schedule.dateMode &&
-          schedule.activeDay === day &&
-          (schedule.activeWeek === undefined ||
-            (weekMode === "odd" && schedule.activeWeek % 2 === 1) ||
-            (weekMode === "even" && schedule.activeWeek % 2 === 0)))
+        !schedule.dateMode &&
+        schedule.activeDay === dayIndex &&
+        (weekMode === "all" ||
+          (weekMode === "odd" && schedule.activeWeek === 1) ||
+          (weekMode === "even" && schedule.activeWeek === 2))
     );
 
     return todaySchedule?.lessons || [];

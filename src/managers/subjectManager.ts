@@ -77,13 +77,17 @@ export class SubjectManager {
     const index = this.config.subjects.findIndex((s: subjectTagret) => s.uuid === uuid);
     if (index === -1) {
       return false;
-    }
-
+    }    // 检查常规课程表中的使用情况
     const isInUse = this.config.schedules.some((schedule: any) =>
       schedule.lessons.some((lesson: any) => lesson.subjectUuid === uuid)
     );
 
-    if (isInUse) {
+    // 检查临时课程表中的使用情况
+    const isInTemporary = this.config.temporarySchedules?.some((schedule: any) =>
+      schedule.lessons.some((lesson: any) => lesson.subjectUuid === uuid)
+    );
+
+    if (isInUse || isInTemporary) {
       return false;
     }
 

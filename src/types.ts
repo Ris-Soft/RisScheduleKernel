@@ -4,11 +4,13 @@ import { UUID } from "crypto";
  * 表示一节课程，包括开始时间、结束时间和关联的科目UUID。
  *
  * @property subjectUuid - 课程对应科目的唯一标识符(UUID)。
+ * @property timeUuid - 课程时间段的唯一标识符(UUID)。
  * @property cachedName - 可选属性，缓存的课程名称。
  * @property cachedShortName - 可选属性，缓存的课程短名称。
  */
-export interface lessonTaget {
+export interface lessonTarget {
   subjectUuid: UUID;
+  timeUuid: UUID;
   cachedName?: string; // 可选属性，缓存的课程名称
   cachedShortName?: string; // 可选属性，缓存的课程短名称
 }
@@ -23,7 +25,7 @@ export interface lessonTaget {
  * @property teacherName - 教师姓名。
  * @property extra - 额外信息，如是否为户外课程。
  */
-export interface subjectTagret {
+export interface subjectTarget {
   uuid: UUID;
   name: string;
   type: "subject" | "activity"; // activity 下不会显示在列表中，但是会显示当前课程状态
@@ -51,7 +53,7 @@ export interface timeTarget {
  */
 export interface temporarySchedule {
   date: string; // 日期，格式为 "YYYY-MM-DD"
-  lessons: lessonTaget[];
+  lessons: lessonTarget[];
   originalDayIndex: number; // 原始星期几（1-7）
   originalWeek: number; // 原始周数（1或2，对应单双周）
 }
@@ -64,7 +66,7 @@ export interface scheduleType {
   activeDate?: Date; // 日期模式下的具体日期
   activeDay?: number; // 非日期模式下的星期几（1-7）
   activeWeek?: number; // 非日期模式下的周数（1,2 分别对应单双周）
-  lessons: lessonTaget[]; // 课程列表
+  lessons: lessonTarget[]; // 课程列表
 }
 
 /**
@@ -76,7 +78,7 @@ export interface configType {
   groupUuid: UUID;
   startDate: Date;
   schedules: scheduleType[];
-  subjects: subjectTagret[];
+  subjects: subjectTarget[];
   timeTargets: timeTarget[];
   temporarySchedules?: temporarySchedule[]; // 临时课程安排
 }

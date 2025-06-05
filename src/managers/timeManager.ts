@@ -6,16 +6,25 @@ export class TimeManager {
 
   /**
    * 获取当前时间的课程状态
-   */
-  getCurrentLessonStatus() {
+   */  getCurrentLessonStatus() {
     const now = new Date();
     const timeStr = now.toTimeString().slice(0, 8);
-    const lessons = this.config.lessons || [];
     const timeTargets = this.config.timeTargets;
-
+    
+    // 先排序时间段
     const sortedTimeTargets = [...timeTargets].sort((a, b) =>
       a.startTime.localeCompare(b.startTime)
     );
+
+    // 获取当天的课程列表
+    const { weekType, dayIndex } = this.getWeekTypeForDate(now);
+    const todaySchedule = this.config.schedules.find(
+      (s: any) =>
+        !s.dateMode &&
+        s.activeDay === dayIndex &&
+        (weekType === "odd" ? s.activeWeek === 1 : s.activeWeek === 2)
+    );
+    const lessons = todaySchedule?.lessons || [];
 
     if (sortedTimeTargets[0] && timeStr < sortedTimeTargets[0].startTime) {
       return {
@@ -228,8 +237,20 @@ export class TimeManager {
       a.startTime.localeCompare(b.startTime)
     );
   }
-
   private generateUUID(): UUID {
     return require('crypto').randomUUID();
+  }
+
+  private getWeekTypeForDate(date: Date): { weekType: "odd" | "even"; dayIndex: number } {
+    const startDate = new Date(this.config.startDate);
+    const timeDiff = date.getTime() - startDate.getTime();
+    const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+    const weekNumber = Math.floor(daysDiff / 7);
+    const dayIndex = date.getDay() || 7; // 将周日的0转换为7
+
+    return {
+      weekType: weekNumber % 2 === 0 ? "odd" : "even",
+      dayIndex,
+    };
   }
 }

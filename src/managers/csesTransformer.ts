@@ -141,8 +141,10 @@ export class CsesTransformer {
             const key = `${day}-${week}`;
 
             const lessons: CsesClass[] = schedule.lessons.map(lesson => {
-                const subject = config.subjects.find(s => s.uuid === lesson.subjectUuid)!;
-                const timeTarget = config.timeTargets.find(t => t.UUID === (lesson as any).timeUuid)!;
+                const subject = config.subjects.find(s => s.uuid === lesson.subjectUuid)!;                const timeTarget = config.timeTargets.find(t => t.UUID === lesson.timeUuid);
+                if (!timeTarget) {
+                    throw new Error(`未找到时间段: ${lesson.timeUuid}`);
+                }
                 return {
                     subject: subject.name,
                     start_time: timeTarget.startTime,
