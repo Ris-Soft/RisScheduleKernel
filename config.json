@@ -1,0 +1,17 @@
+{
+  "version": "1.0.0",
+  "groupName": "",
+  "groupUuid": "",
+  "startDate": "2025-06-05T08:02:11.502Z",
+  "schedules": [],
+  "subjects": [
+    {
+      "name": "物理",
+      "teacherName": "张老师",
+      "type": "subject",
+      "shortName": "物理",
+      "uuid": "2b3bf1df-0a4f-4855-9139-d146179562f6"
+    }
+  ],
+  "timeTargets": []
+}
