@@ -1,5 +1,5 @@
 {
-  "name": "schedule-core",
+  "name": "schedule-kernel",
   "version": "1.0.0",
   "description": "The back-end core module used for storing/displaying the course schedule",
   "main": "dist/index.js",
