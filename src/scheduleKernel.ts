@@ -29,17 +29,17 @@ export class ScheduleKernel {
   /**
    * 课程管理器
    */
-  private lessonManager: LessonManager;
+  lessonManager: LessonManager;
 
   /**
    * 科目管理器
    */
-  private subjectManager: SubjectManager;
+  subjectManager: SubjectManager;
 
   /**
    * 时间管理器
    */
-  private timeManager: TimeManager;
+  timeManager: TimeManager;
 
   /**
    * 构造函数，初始化配置文件路径并加载配置。
