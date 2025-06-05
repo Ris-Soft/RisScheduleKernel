@@ -1,4 +1,3 @@
-import { UUID } from "crypto";
 import { readFileSync, writeFileSync } from "fs";
 import { configType } from "./types";
 import { getDefaultConfig } from "./utils";
