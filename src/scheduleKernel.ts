@@ -109,48 +109,6 @@ export class ScheduleKernel {
     }
   }
 
-  // 委托到 LessonManager 的方法
-  getTodayLessons = () => this.lessonManager.getTodayLessons(this.weekMode);
-  getTeacherLessons = (teacherName: string) =>
-    this.lessonManager.getTeacherLessons(teacherName);
-  getSubjectLessons = (subjectUuid: UUID) =>
-    this.lessonManager.getSubjectLessons(subjectUuid);
-  editLesson = (
-    dayIndex: 1 | 2 | 3 | 4 | 5 | 6 | 7,
-    lessonIndex: number,
-    subjectUuid: UUID,
-    week?: "odd" | "even"
-  ) =>
-    this.lessonManager.editLesson(
-      dayIndex,
-      lessonIndex,
-      subjectUuid,
-      this.weekMode,
-      week
-    );
-  swapLessons = (
-    source: any,
-    target: any,
-    date?: Date,
-    isTemporary: boolean = false
-  ) => this.lessonManager.swapLessons(source, target, date, isTemporary);
-
-  // 委托到 SubjectManager 的方法
-  getAllSubjects = () => this.subjectManager.getAllSubjects();
-  getSubject = (uuid: UUID) => this.subjectManager.getSubject(uuid);
-  getSubjectUuidByName = (name: string) =>
-    this.subjectManager.getSubjectUuidByName(name);
-  getSubjectNameByUuid = (uuid: UUID) =>
-    this.subjectManager.getSubjectNameByUuid(uuid);
-  createSubject = (subject: any) => this.subjectManager.createSubject(subject);
-  editSubject = (uuid: UUID, subject: any) =>
-    this.subjectManager.editSubject(uuid, subject);
-  deleteSubject = (uuid: UUID) => this.subjectManager.deleteSubject(uuid);
-
-  // 委托到 TimeManager 的方法
-  getCurrentLessonStatus = () => this.timeManager.getCurrentLessonStatus();
-  editTimeTarget = (uuid: UUID, startTime: string, endTime: string) =>
-    this.timeManager.editTimeTarget(uuid, startTime, endTime);
 
   /**
    * 保存当前配置到本地文件
