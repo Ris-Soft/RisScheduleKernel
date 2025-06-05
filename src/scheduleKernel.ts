@@ -49,9 +49,16 @@ export class ScheduleKernel {
     try {
       raw = readFileSync(this.configPath, "utf-8");
     } catch (e) {
+      // 文件不存在则创建并写入默认配置
+      if ((e as NodeJS.ErrnoException).code === "ENOENT") {
+      const def = getDefaultConfig();
+      writeFileSync(this.configPath, JSON.stringify(def, null, 2), "utf-8");
+      raw = JSON.stringify(def);
+      } else {
       throw new Error(
         `配置文件读取失败: ${e instanceof Error ? e.message : String(e)}`
       );
+      }
     }
 
     let parsed: Partial<configType> = {};
