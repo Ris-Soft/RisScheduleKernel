@@ -1,6 +1,6 @@
 import { UUID, randomUUID } from "crypto";
 import * as yaml from 'js-yaml';
-import { configType, subjectTarget, timeTarget, lessonTarget, scheduleType } from "../types";
+import { configType, subjectTarget, timeTarget, lessonTarget, scheduleType, timeTargets } from "../types";
 
 interface CsesSubject {
     name: string;
@@ -34,7 +34,7 @@ export class CsesTransformer {
      */
     public static fromCses(content: string): configType {
         const csesData = yaml.load(content) as CsesConfig;
-        
+
         if (csesData.version !== 1) {
             throw new Error('不支持的CSES版本');
         }
@@ -49,25 +49,31 @@ export class CsesTransformer {
             extra: { outdoor: false }
         }));
 
+        let times: timeTargets[] = [];
         // 创建时间表（所有不重复的时间段）
-        const timeMap = new Map<string, timeTarget>();
-        csesData.schedules.forEach(schedule => {
+        csesData.schedules.forEach((schedule, index) => {
+            let Times: timeTarget[] = [];
             schedule.classes.forEach(cls => {
-                const key = `${cls.start_time}-${cls.end_time}`;
-                if (!timeMap.has(key)) {
-                    timeMap.set(key, {
-                        UUID: randomUUID() as UUID,
-                        startTime: cls.start_time,
-                        endTime: cls.end_time
-                    });
-                }
+                const startTime = cls.start_time;
+                const endTime = cls.end_time;
+                let timetarget: timeTarget = {
+                    startTime: startTime,
+                    endTime: endTime
+                };
+                Times.push(timetarget);
             });
+            let timeTargets: timeTargets = {
+                id: randomUUID() as UUID,
+                name: '未命名时间表 ' + (index + 1),
+                targets: Times
+            }
+            times.push(timeTargets);
         });
-        const timeTargets = Array.from(timeMap.values());
+
 
         // 转换课程表
         const schedules: scheduleType[] = [];
-        csesData.schedules.forEach(schedule => {
+        csesData.schedules.forEach((schedule, index) => {
             // 创建课程列表
             const lessons = schedule.classes.map(cls => {
                 const subject = subjects.find(s => s.name === cls.subject);
@@ -75,15 +81,15 @@ export class CsesTransformer {
                     throw new Error(`未找到科目: ${cls.subject}`);
                 }
 
-                // 找到对应的时间段
-                const timeKey = `${cls.start_time}-${cls.end_time}`;
-                const timeTarget = timeMap.get(timeKey)!;
+                const timeTargetName = '未命名时间表 ' + (index + 1);
+                const timeTargetsFound = times.find(t => t.name === timeTargetName);
+                if (!timeTargetsFound) {
+                    throw new Error(`未找到时间表: ${timeTargetName}`);
+                }
 
                 return {
-                    subjectUuid: subject.uuid,
-                    cachedName: subject.name,
-                    cachedShortName: subject.shortName,
-                    timeUuid: timeTarget.UUID
+                    subjectName: subject.name,
+                    timeUuid: timeTargetsFound.id
                 } as lessonTarget;
             });
 
@@ -113,11 +119,10 @@ export class CsesTransformer {
 
         return {
             version: '1.0',
-            groupUuid: randomUUID() as UUID,
             startDate: new Date(),
             schedules,
             subjects,
-            timeTargets
+            timeTargets: times,
         };
     }
 
@@ -140,15 +145,15 @@ export class CsesTransformer {
             const week = schedule.activeWeek === 1 ? 'odd' : 'even';
             const key = `${day}-${week}`;
 
-            const lessons: CsesClass[] = schedule.lessons.map(lesson => {
-                const subject = config.subjects.find(s => s.uuid === lesson.subjectUuid)!;                const timeTarget = config.timeTargets.find(t => t.UUID === lesson.timeUuid);
+            const lessons: CsesClass[] = schedule.lessons.map((lesson, index) => {
+                const timeTarget = config.timeTargets.find(t => t.id === schedule.timeUuid);
                 if (!timeTarget) {
-                    throw new Error(`未找到时间段: ${lesson.timeUuid}`);
+                    throw new Error(`未找到时间段: ${schedule.timeUuid}`);
                 }
                 return {
-                    subject: subject.name,
-                    start_time: timeTarget.startTime,
-                    end_time: timeTarget.endTime
+                    subject: lesson.subjectName,
+                    start_time: timeTarget.targets[index].startTime,
+                    end_time: timeTarget.targets[index].endTime
                 };
             });
 
@@ -167,7 +172,7 @@ export class CsesTransformer {
         // 合并相同天的单双周课程（如果课程表完全相同）
         const mergedSchedules: CsesSchedule[] = [];
         const daySchedules = new Map<number, CsesSchedule[]>();
-        
+
         // 按天分组
         for (const schedule of scheduleMap.values()) {
             const existingSchedules = daySchedules.get(schedule.enable_day) || [];

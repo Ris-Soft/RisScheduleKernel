@@ -61,6 +61,7 @@ export interface scheduleType {
   activeDate?: Date; // 日期模式下的具体日期
   activeDay?: number; // 非日期模式下的星期几（1-7）
   activeWeek?: number; // 非日期模式下的周数（1,2 分别对应单双周）
+  timeUuid?: UUID; // 时间段的唯一标识符(UUID)
   lessons: lessonTarget[]; // 课程列表
 }
 

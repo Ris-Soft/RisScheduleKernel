@@ -1,8 +1,8 @@
 import { UUID } from "crypto";
-import { timeTarget } from "../types";
+import { timeTarget, timeTargets } from "../types";
 
 export class TimeManager {
-  constructor(private config: any) {}
+  constructor(private config: any) { }
 
   /**
    * 获取当前时间的课程状态
@@ -10,7 +10,7 @@ export class TimeManager {
     const now = new Date();
     const timeStr = now.toTimeString().slice(0, 8);
     const timeTargets = this.config.timeTargets;
-    
+
     // 先排序时间段
     const sortedTimeTargets = [...timeTargets].sort((a, b) =>
       a.startTime.localeCompare(b.startTime)
@@ -64,11 +64,16 @@ export class TimeManager {
   }
 
   /**
-   * 编辑时间表
+   * 编辑时间表某索引起止时间
+   * @param uuid 时间表项的UUID
+   * @param tragetIndex 要编辑的时间表项索引
+   * @param startTime 新的开始时间 "HH:mm:ss"
+   * @param endTime 新的结束时间 "HH:mm:ss"
+   * @returns 是否编辑成功
    */
-  editTimeTarget(uuid: UUID, startTime: string, endTime: string): boolean {
-    const timeTarget = this.config.timeTargets.find((t: any) => t.UUID === uuid);
-    if (!timeTarget) {
+  editTimeTarget(uuid: UUID, tragetIndex: number, startTime: string, endTime: string): boolean {
+    const timeTargets: timeTargets = this.config.timeTargets.find((t: any) => t.id === uuid);
+    if (!timeTargets) {
       return false;
     }
 
@@ -77,38 +82,57 @@ export class TimeManager {
       return false;
     }
 
-    timeTarget.startTime = startTime;
-    timeTarget.endTime = endTime;
+    timeTargets.targets[tragetIndex].startTime = startTime;
+    timeTargets.targets[tragetIndex].endTime = endTime;
+
     return true;
   }
 
   /**
-   * 创建新的时间表项
-   * @param startTime 开始时间 "HH:mm:ss"
-   * @param endTime 结束时间 "HH:mm:ss"
-   * @returns 新创建的时间表项的UUID，如果创建失败则返回undefined
+   * 编辑时间表项
+   * @param uuid 时间表项的UUID
+   * @param targets 要更新的时间表项属性
+   * @returns 是否编辑成功
    */
-  createTimeTarget(startTime: string, endTime: string): UUID | undefined {
-    const timeRegex = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/;
-    if (!timeRegex.test(startTime) || !timeRegex.test(endTime)) {
-      return undefined;
+  editTimeTargets(uuid: UUID, targets: Partial<timeTargets>): boolean {
+    const index = this.config.timeTargets.findIndex((t: any) => t.id === uuid);
+    const timeTargets: timeTargets = this.config.timeTargets[index];
+    if (!timeTargets) {
+      return false;
     }
 
-    // 检查时间是否有冲突
-    if (this.hasTimeConflict(startTime, endTime)) {
-      return undefined;
-    }
-
-    const newUuid = this.generateUUID();
-    const newTimeTarget: timeTarget = {
-      UUID: newUuid,
-      startTime,
-      endTime,
+    // 更新时间表项
+    const newTargets: timeTargets = {
+      ...timeTargets,
+      ...targets,
     };
 
-    this.config.timeTargets.push(newTimeTarget);
-    this.sortTimeTargets();
-    return newUuid;
+    this.config.timeTargets[index] = newTargets;
+
+    return true;
+
+  }
+
+  /**
+   * 创建新的时间表项
+   * @param name 时间表项名称
+   * @param target 时间表项的目标时间段
+   * @return 是否创建成功
+   */
+  createTimeTargets(name: string, target: timeTarget): boolean {
+    const newUuid: UUID = this.generateUUID();
+
+    // 更新时间表项
+    const newTargets: timeTargets = {
+      id: newUuid,
+      name,
+      targets: [target]
+    };
+
+    this.config.timeTargets.push(newTargets);
+
+    return true;
+
   }
 
   /**
@@ -119,34 +143,32 @@ export class TimeManager {
    * @returns 新创建的时间表项的UUID，如果创建失败则返回undefined
    */
   insertTimeTargetAfter(
-    afterUuid: UUID,
+    id: UUID,
+    index: number,
     startTime: string,
-    endTime: string
+    endTime: string,
   ): UUID | undefined {
     const timeRegex = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/;
     if (!timeRegex.test(startTime) || !timeRegex.test(endTime)) {
       return undefined;
     }
 
-    const index = this.config.timeTargets.findIndex((t: timeTarget) => t.UUID === afterUuid);
-    if (index === -1) {
+    // 检查时间是否有冲突
+    if (this.hasTimeConflict(id, startTime, endTime)) {
       return undefined;
     }
 
-    // 检查时间是否有冲突
-    if (this.hasTimeConflict(startTime, endTime)) {
-      return undefined;
-    }
+    const index2 = this.config.timeTargets.findIndex((t: any) => t.id === id);
+    const timeTargets: timeTargets = this.config.timeTargets[index2];
 
     const newUuid = this.generateUUID();
     const newTimeTarget: timeTarget = {
-      UUID: newUuid,
       startTime,
       endTime,
     };
 
-    this.config.timeTargets.splice(index + 1, 0, newTimeTarget);
-    this.sortTimeTargets();
+    this.config.timeTargets[index2].targets.splice(index + 1, 0, newTimeTarget);
+    this.sortTimeTargets(id);
     return newUuid;
   }
 
@@ -155,8 +177,8 @@ export class TimeManager {
    * @param uuid 要删除的时间表项的UUID
    * @returns 是否删除成功
    */
-  deleteTimeTarget(uuid: UUID): boolean {
-    const index = this.config.timeTargets.findIndex((t: timeTarget) => t.UUID === uuid);
+  deleteTimeTargets(uuid: UUID): boolean {
+    const index = this.config.timeTargets.findIndex((t: timeTargets) => t.id === uuid);
     if (index === -1) {
       return false;
     }
@@ -166,56 +188,36 @@ export class TimeManager {
   }
 
   /**
-   * 替换某一天的时间表
-   * @param dayIndex 星期几（1-7）
-   * @param timeTargets 新的时间表项数组
-   * @returns 是否替换成功
+   * 删除时间表项中的某个时间段
+   * @param uuid 时间表项的UUID
+   * @param targetIndex 要删除的时间段索引
+   * @returns 是否删除成功
    */
-  replaceTimeTargetsForDay(
-    dayIndex: 1 | 2 | 3 | 4 | 5 | 6 | 7,
-    timeTargets: { startTime: string; endTime: string }[]
-  ): boolean {
-    // 验证所有时间格式
-    const timeRegex = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/;
-    if (!timeTargets.every(t => 
-      timeRegex.test(t.startTime) && timeRegex.test(t.endTime)
-    )) {
+  deleteTimeTarget(uuid: UUID, targetIndex: number): boolean {
+    const timeTargets: timeTargets = this.config.timeTargets.find((t: any) => t.id === uuid);
+    if (!timeTargets || targetIndex < 0 || targetIndex >= timeTargets.targets.length) {
       return false;
     }
-
-    // 检查时间是否有冲突
-    for (let i = 0; i < timeTargets.length; i++) {
-      if (this.hasTimeConflict(timeTargets[i].startTime, timeTargets[i].endTime, timeTargets)) {
-        return false;
-      }
+    timeTargets.targets.splice(targetIndex, 1);
+    if (timeTargets.targets.length === 0) {
+      // 如果没有时间段了，删除整个时间表项
+      this.deleteTimeTargets(uuid);
     }
-
-    // 删除原有的时间表项
-    this.config.timeTargets = this.config.timeTargets.filter((t: timeTarget) => {
-      const time = new Date();
-      time.setHours(parseInt(t.startTime.split(':')[0]));
-      return time.getDay() !== dayIndex;
-    });
-
-    // 添加新的时间表项
-    const newTimeTargets = timeTargets.map(t => ({
-      UUID: this.generateUUID(),
-      startTime: t.startTime,
-      endTime: t.endTime,
-    }));
-
-    this.config.timeTargets.push(...newTimeTargets);
-    this.sortTimeTargets();
     return true;
   }
 
   private hasTimeConflict(
+    id: UUID,
     startTime: string,
     endTime: string,
-    excludeTargets?: { startTime: string; endTime: string }[]
+    excludeTargets?: timeTarget[]
   ): boolean {
-    const targets = excludeTargets || this.config.timeTargets;
-    return targets.some((target: { startTime: string; endTime: string }) => {
+    // 获取所有 timeTarget 类型的时间段
+
+    const targets: timeTarget[] = excludeTargets || (
+      this.config.timeTargets.find((t: timeTargets) => t.id === id)?.targets || []
+    );
+    return targets.some((target: timeTarget) => {
       if (target.startTime === startTime || target.endTime === endTime) {
         return true;
       }
@@ -232,8 +234,12 @@ export class TimeManager {
     return hours * 60 + minutes;
   }
 
-  private sortTimeTargets(): void {
-    this.config.timeTargets.sort((a: timeTarget, b: timeTarget) =>
+  private sortTimeTargets(id: UUID): void {
+    const index = this.config.timeTargets.findIndex((t: any) => t.id === id);
+    if (index === -1) {
+      return;
+    }
+    this.config.timeTargets[index].targets.sort((a: timeTarget, b: timeTarget) =>
       a.startTime.localeCompare(b.startTime)
     );
   }

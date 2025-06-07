@@ -94,6 +94,16 @@ export class ScheduleKernel {
     this.weekMode = weekType;
   }
 
+  emptyConfig(): boolean {
+    try {
+      this.config = getDefaultConfig();
+      this.saveConfig();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
 
   /**
    * 保存当前配置到本地文件

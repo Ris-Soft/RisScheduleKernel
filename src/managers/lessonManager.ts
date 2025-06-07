@@ -1,9 +1,9 @@
-import { UUID } from "crypto";
+import { UUID, randomUUID } from "crypto";
 import { lessonTarget, scheduleType, subjectTarget } from "../types";
 import { getWeekTypeForDate } from "../utils";
 
 export class LessonManager {
-  constructor(private config: any) {}
+  constructor(private config: any) { }
 
   /**
    * 获取今日课程数据（已处理单双周）
@@ -11,7 +11,7 @@ export class LessonManager {
    */  getTodayLessons(weekMode: string): lessonTarget[] {
     const today = new Date();
     const dateStr = today.toISOString().split('T')[0];
-    
+
     // 先检查是否有临时课程安排
     if (this.config.temporarySchedules) {
       const tempSchedule = this.config.temporarySchedules.find(
@@ -53,7 +53,7 @@ export class LessonManager {
             schedule,
             lesson,
           }))
-          .filter((item) => item.lesson.subjectUuid === subject.uuid)
+          .filter((item) => item.lesson.subjectName === subject.name)
       );
 
       return {
@@ -66,7 +66,7 @@ export class LessonManager {
   /**
    * 索引某个科目的全部课程
    */
-  getSubjectLessons(subjectUuid: UUID) {
+  getSubjectLessons(subjectName: string) {
     return this.config.schedules.flatMap((schedule: scheduleType) =>
       schedule.lessons
         .map((lesson, index) => ({
@@ -75,17 +75,18 @@ export class LessonManager {
           schedule,
           lesson,
         }))
-        .filter((item) => item.lesson.subjectUuid === subjectUuid)
+        .filter((item) => item.lesson.subjectName === subjectName)
     );
   }
 
   /**
    * 编辑周几第几节次的课程
+   * 
    */
   editLesson(
     dayIndex: 1 | 2 | 3 | 4 | 5 | 6 | 7,
     lessonIndex: number,
-    subjectUuid: UUID,
+    subjectName: string,
     weekMode: string,
     week?: "odd" | "even"
   ): boolean {
@@ -111,12 +112,17 @@ export class LessonManager {
       return false;
     }
 
-    schedule.lessons[lessonIndex].subjectUuid = subjectUuid;
+    schedule.lessons[lessonIndex].subjectName = subjectName;
     return true;
   }
 
   /**
    * 交换两个课程
+   * @param source 源课程信息，包括星期几、节次和可选的单双周
+   * @param target 目标课程信息，包括星期几、节次和可选的单双周
+   * @param date 可选的日期，如果提供，则进行临时课程交换
+   * @param isTemporary 是否为临时交换，默认为 false
+   * @returns 是否交换成功
    */
   swapLessons(
     source: { dayIndex: number; lessonIndex: number; week?: "odd" | "even" },
@@ -313,13 +319,13 @@ export class LessonManager {
   /**
    * 创建新的课节配置
    * @param dayIndex 星期几（1-7）
-   * @param subjectUuid 科目UUID
+   * @param subjectName 科目名称
    * @param week 可选的周数设置（单周/双周）
    * @returns 添加的位置索引，失败返回-1
    */
   createLesson(
     dayIndex: 1 | 2 | 3 | 4 | 5 | 6 | 7,
-    subjectUuid: UUID,
+    subjectName: string,
     week?: "odd" | "even"
   ): number {
     const schedule = this.config.schedules.find(
@@ -338,13 +344,13 @@ export class LessonManager {
         dateMode: false,
         activeDay: dayIndex,
         activeWeek: week === "even" ? 2 : 1,
-        lessons: [{ subjectUuid, timeUuid: crypto.randomUUID() }],
+        lessons: [{ subjectName }],
       };
       this.config.schedules.push(newSchedule);
       return 0;
     }
 
-    schedule.lessons.push({ subjectUuid });
+    schedule.lessons.push({ subjectName });
     return schedule.lessons.length - 1;
   }
 
@@ -352,14 +358,14 @@ export class LessonManager {
    * 在指定课节后添加新课节
    * @param dayIndex 星期几（1-7）
    * @param lessonIndex 在此课节后添加
-   * @param subjectUuid 科目UUID
+   * @param subjectName 科目名称
    * @param week 可选的周数设置（单周/双周）
    * @returns 是否添加成功
    */
   insertLessonAfter(
     dayIndex: 1 | 2 | 3 | 4 | 5 | 6 | 7,
     lessonIndex: number,
-    subjectUuid: UUID,
+    subjectName: string,
     week?: "odd" | "even"
   ): boolean {
     const schedule = this.config.schedules.find(
@@ -377,7 +383,7 @@ export class LessonManager {
       return false;
     }
 
-    schedule.lessons.splice(lessonIndex + 1, 0, { subjectUuid });
+    schedule.lessons.splice(lessonIndex + 1, 0, { subjectName });
     return true;
   }
 
