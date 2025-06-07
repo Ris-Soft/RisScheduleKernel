@@ -6,15 +6,10 @@ export class TimeManager {
 
   /**
    * 获取当前时间的课程状态
-   */  getCurrentLessonStatus() {
+   */
+  getCurrentLessonStatus() {
     const now = new Date();
     const timeStr = now.toTimeString().slice(0, 8);
-    const timeTargets = this.config.timeTargets;
-
-    // 先排序时间段
-    const sortedTimeTargets = [...timeTargets].sort((a, b) =>
-      a.startTime.localeCompare(b.startTime)
-    );
 
     // 获取当天的课程列表
     const { weekType, dayIndex } = this.getWeekTypeForDate(now);
@@ -26,17 +21,30 @@ export class TimeManager {
     );
     const lessons = todaySchedule?.lessons || [];
 
-    if (sortedTimeTargets[0] && timeStr < sortedTimeTargets[0].startTime) {
+    // 获取今天的时间段
+    const timeTargetsObj = this.config.timeTargets.find((t: any) => t.id === todaySchedule?.timeTargetId);
+    const targets = timeTargetsObj?.targets || [];
+
+    // 先排序时间段
+    const sortedTargets = [...targets].sort((a, b) =>
+      a.startTime.localeCompare(b.startTime)
+    );
+
+    if (sortedTargets.length === 0) {
+      return { status: "no_time_targets" as const };
+    }
+
+    if (timeStr < sortedTargets[0].startTime) {
       return {
         status: "not_started" as const,
         nextLesson: lessons[0],
-        timeTarget: sortedTimeTargets[0],
+        timeTarget: sortedTargets[0],
       };
     }
 
-    for (let i = 0; i < sortedTimeTargets.length; i++) {
-      const current = sortedTimeTargets[i];
-      const next = sortedTimeTargets[i + 1];
+    for (let i = 0; i < sortedTargets.length; i++) {
+      const current = sortedTargets[i];
+      const next = sortedTargets[i + 1];
 
       if (timeStr >= current.startTime && timeStr <= current.endTime) {
         return {
