@@ -1,4 +1,3 @@
-import { UUID } from "crypto";
 import { configType } from "./types";
 
 /**
@@ -8,7 +7,6 @@ export function getDefaultConfig(): configType {
   return {
     version: "1.0.0",
     groupName: "",
-    groupUuid: "" as UUID,
     startDate: new Date(),
     schedules: [],
     subjects: [],

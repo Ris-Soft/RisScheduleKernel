@@ -9,10 +9,7 @@ import { UUID } from "crypto";
  * @property cachedShortName - 可选属性，缓存的课程短名称。
  */
 export interface lessonTarget {
-  subjectUuid: UUID;
-  timeUuid: UUID;
-  cachedName?: string; // 可选属性，缓存的课程名称
-  cachedShortName?: string; // 可选属性，缓存的课程短名称
+  subjectName: string;
 }
 
 /**
@@ -26,7 +23,6 @@ export interface lessonTarget {
  * @property extra - 额外信息，如是否为户外课程。
  */
 export interface subjectTarget {
-  uuid: UUID;
   name: string;
   type: "subject" | "activity"; // activity 下不会显示在列表中，但是会显示当前课程状态
   shortName?: string; // 可选属性，短名称
@@ -43,7 +39,6 @@ export interface subjectTarget {
  * @property endTime - 结束时间，格式为 "HH:mm:ss"。
  */
 export interface timeTarget {
-  UUID: UUID; // 唯一标识符(UUID)
   startTime: string; // 开始时间，格式为 "HH:mm:ss"
   endTime: string; // 结束时间，格式为 "HH:mm:ss"
 }
@@ -69,16 +64,21 @@ export interface scheduleType {
   lessons: lessonTarget[]; // 课程列表
 }
 
+export interface timeTargets {
+  id: UUID;
+  name: string;
+  targets: timeTarget[];
+}
+
 /**
  * 课程表配置类型
  */
 export interface configType {
   version: string;
   groupName?: string;
-  groupUuid: UUID;
   startDate: Date;
   schedules: scheduleType[];
   subjects: subjectTarget[];
-  timeTargets: timeTarget[];
+  timeTargets: timeTargets[];
   temporarySchedules?: temporarySchedule[]; // 临时课程安排
 }

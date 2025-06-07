@@ -50,13 +50,13 @@ export class ScheduleKernel {
     } catch (e) {
       // 文件不存在则创建并写入默认配置
       if ((e as NodeJS.ErrnoException).code === "ENOENT") {
-      const def = getDefaultConfig();
-      writeFileSync(this.configPath, JSON.stringify(def, null, 2), "utf-8");
-      raw = JSON.stringify(def);
+        const def = getDefaultConfig();
+        writeFileSync(this.configPath, JSON.stringify(def, null, 2), "utf-8");
+        raw = JSON.stringify(def);
       } else {
-      throw new Error(
-        `配置文件读取失败: ${e instanceof Error ? e.message : String(e)}`
-      );
+        throw new Error(
+          `配置文件读取失败: ${e instanceof Error ? e.message : String(e)}`
+        );
       }
     }
 
@@ -70,18 +70,10 @@ export class ScheduleKernel {
     }
 
     const def = getDefaultConfig();
-    // Ensure groupUuid matches the template literal type (UUID format)
-    const uuidRegex =
-      /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
-    const groupUuid: `${string}-${string}-${string}-${string}-${string}` =
-      typeof parsed.groupUuid === "string" && uuidRegex.test(parsed.groupUuid)
-        ? (parsed.groupUuid as `${string}-${string}-${string}-${string}-${string}`)
-        : (def.groupUuid as `${string}-${string}-${string}-${string}-${string}`);
 
     this.config = {
       ...def,
       ...parsed,
-      groupUuid,
       schedules: Array.isArray(parsed.schedules) ? parsed.schedules : [],
       subjects: Array.isArray(parsed.subjects) ? parsed.subjects : [],
       startDate: parsed.startDate ? new Date(parsed.startDate) : def.startDate,
@@ -96,7 +88,8 @@ export class ScheduleKernel {
 
   /**
    * 设定单双周状态
-   */  setWeekMode(date: Date): void {
+   */
+  setWeekMode(date: Date): void {
     const { weekType } = getWeekTypeForDate(this.config.startDate, date);
     this.weekMode = weekType;
   }
